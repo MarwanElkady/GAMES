@@ -1,8 +1,10 @@
 #include <iostream>
 #include "FiveByFive.h"
-#include "ReverseTicTacToe.h" 
+#include "ReverseTicTacToe.h"
 #include "PyramidTicTacToe.h" 
-#include "WordTicTacToe.h"
+#include "wordtictactoe.h"
+#include "ConnectFour.h"  
+#include "NumericalGame.h" 
 
 
 using namespace std;
@@ -292,7 +294,102 @@ int main()
 
 
         }
+        else if (choice == 5)
+        {
+            NumericalBoard<int>* board = new NumericalBoard<int>();
+            Player<int>* players[2];
+            char choice;
 
+            while (true) {
+                cout << "Choose Player 1 (h for human, r for random): ";
+                cin >> choice;
+                if (choice == 'h' || choice == 'H') {
+                    players[0] = new NumericalPlayer<int>("Player 1", {1, 3, 5, 7, 9});
+                    break;
+                } else if (choice == 'r' || choice == 'R') {
+                    players[0] = new NumericalRandomPlayer<int>(0, {1, 3, 5, 7, 9});
+                    break;
+                } else {
+                    cout << "Invalid choice. Please enter 'h' for human or 'r' for random." << endl;
+                }
+            }
+
+
+            while (true) {
+                cout << "Choose Player 2 (h for human, r for random): ";
+                cin >> choice;
+                if (choice == 'h' || choice == 'H') {
+                    players[1] = new NumericalPlayer<int>("Player 2", {2, 4, 6, 8});
+                    break;
+                } else if (choice == 'r' || choice == 'R') {
+                    players[1] = new NumericalRandomPlayer<int>(0, {2, 4, 6, 8});
+                    break;
+                } else {
+                    cout << "Invalid choice. Please enter 'h' for human or 'r' for random." << endl;
+                }
+            }
+
+
+            players[0]->setBoard(board);
+            players[1]->setBoard(board);
+
+ 
+            GameManager<int> gameManager(board, players);
+            cout << "Welcome to Numerical Tic-Tac-Toe!" << endl;
+            gameManager.run();
+
+
+            delete players[0];
+            delete players[1];
+            delete board;
+
+            return 0;
+        }
+        else if (choice == 6) 
+        {
+            ConnectFourBoard<char>* board = new ConnectFourBoard<char>();
+
+            Player<char>* players[2];
+            char choice;
+
+            while (true) {
+                cout << "Choose Player 1 (h for human, r for random): ";
+                cin >> choice;
+                if (choice == 'h' || choice == 'H') {
+                    players[0] = new ConnectFourPlayer<char>("Player 1", 'X');
+                    break;
+                } else if (choice == 'r' || choice == 'R') {
+                    players[0] = new ConnectFourRandomPlayer<char>('X');
+                    break;
+                } else {
+                    cout << "Invalid choice. Please enter 'h' for human or 'r' for random." << endl;
+                }
+            }
+
+            while (true) {
+                cout << "Choose Player 2 (h for human, r for random): ";
+                cin >> choice;
+                if (choice == 'h' || choice == 'H') {
+                    players[1] = new ConnectFourPlayer<char>("Player 2", 'O');
+                    break;
+                } else if (choice == 'r' || choice == 'R') {
+                    players[1] = new ConnectFourRandomPlayer<char>('O');
+                    break;
+                } else {
+                    cout << "Invalid choice. Please enter 'h' for human or 'r' for random." << endl;
+                }
+            }
+
+            players[0]->setBoard(board);
+            players[1]->setBoard(board);
+
+            GameManager<char> gameManager(board, players);
+            gameManager.run();
+
+            delete players[0];
+            delete players[1];
+            delete board;
+        }
         else
         {
             cout << "Invalid choice. Exiting program." << endl;
