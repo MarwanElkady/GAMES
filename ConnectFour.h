@@ -137,7 +137,7 @@ public:
 
     void getmove(int& x, int& y) override {
         x = 0;
-        y = rand() % 7;
+        y = rand() % 8;
     }
 };
 
