@@ -6,15 +6,17 @@
 
 using namespace std;
 
-class FiveByFiveBoard : public Board<char>
+class FiveByFive : public Board<char>
 {
 private:
     int rows = 5;
     int columns = 5;
     char **board;
+    int player1_score = 0; // Score for Player 1 ('X')
+    int player2_score = 0; // Score for Player 2 ('O')
 
 public:
-    FiveByFiveBoard()
+    FiveByFive()
     {
         board = new char *[rows];
         for (int i = 0; i < rows; i++)
@@ -27,7 +29,7 @@ public:
         }
     }
 
-    ~FiveByFiveBoard()
+    ~FiveByFive()
     {
         for (int i = 0; i < rows; i++)
         {
@@ -41,9 +43,24 @@ public:
         if (x >= 0 && x < rows && y >= 0 && y < columns && board[x][y] == ' ')
         {
             board[x][y] = symbol;
-            return true; // Valid move
+
+            // Update the score dynamically for the player
+            int points = count_sequences(x, y, symbol);
+            if (symbol == 'X')
+            {
+                player1_score += points;
+            }
+            else if (symbol == 'O')
+            {
+                player2_score += points;
+            }
+
+            // Debugging
+            cout << "Move at (" << x << ", " << y << ") by " << symbol << " scores " << points << " points." << endl;
+
+            return true;
         }
-        return false; // Invalid move
+        return false;
     }
 
     void display_board() override
@@ -64,48 +81,45 @@ public:
             }
             cout << endl;
         }
-        cout << endl;
+
+        cout << "Player 1 (X) Score: " << player1_score << endl;
+        cout << "Player 2 (O) Score: " << player2_score << endl;
     }
 
     bool is_win() override
     {
-        return false; // The game does not declare a winner mid-game
+        // Only check if all cells are filled and return true if the game is over
+        return all_cells_filled();
     }
 
     bool is_draw() override
     {
-        return false; // The game cannot be a draw mid-game
+        return all_cells_filled() && (player1_score == player2_score);
     }
 
     bool game_is_over() override
     {
-        return all_cells_filled(); // Game ends only when all cells are filled
+        return all_cells_filled();
     }
 
-    void determine_winner()
+    string determine_winner()
     {
-        int player1_score = calculate_score('X');
-        int player2_score = calculate_score('O');
-
-        cout << "Game Over!" << endl;
-        cout << "Player 1 (X) Score: " << player1_score << endl;
-        cout << "Player 2 (O) Score: " << player2_score << endl;
-
         if (player1_score > player2_score)
         {
-            cout << "Player 1 (X) wins!" << endl;
+            return "Player 1 (X) wins!";
         }
         else if (player2_score > player1_score)
         {
-            cout << "Player 2 (O) wins!" << endl;
+            return "Player 2 (O) wins!";
         }
         else
         {
-            cout << "It's a tie!" << endl;
+            return "It's a tie!";
         }
     }
 
 private:
+    bool winner_determined = false;
     bool all_cells_filled()
     {
         for (int i = 0; i < rows; i++)
@@ -121,58 +135,85 @@ private:
         return true; // All cells are filled
     }
 
-    int calculate_score(char symbol)
+    int count_sequences(int x, int y, char symbol)
     {
         int score = 0;
-
-        // Directions to check: Horizontal, Vertical, Diagonal (both directions)
-        int directions[4][2] = {{0, 1}, {1, 0}, {1, 1}, {1, -1}};
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < columns; j++)
-            {
-                if (board[i][j] == symbol)
-                {
-                    for (auto &dir : directions)
-                    {
-                        score += check_direction(i, j, symbol, dir[0], dir[1]);
-                    }
-                }
-            }
-        }
+        score += check_sequence(x, y, symbol, 1, 0);  // Horizontal
+        score += check_sequence(x, y, symbol, 0, 1);  // Vertical
+        score += check_sequence(x, y, symbol, 1, 1);  // Diagonal
+        score += check_sequence(x, y, symbol, 1, -1); // Diagonal
         return score;
     }
 
-    int check_direction(int x, int y, char symbol, int dx, int dy)
+    int check_sequence(int x, int y, char symbol, int dx, int dy)
     {
-        int count = 0;
+        int forward_count = 0, backward_count = 0;
 
-        // Check for three-in-a-row sequences in the given direction
-        int nx1 = x + dx, ny1 = y + dy;
-        int nx2 = nx1 + dx, ny2 = ny1 + dy;
-
-        if (nx1 >= 0 && nx1 < rows && ny1 >= 0 && ny1 < columns &&
-            nx2 >= 0 && nx2 < rows && ny2 >= 0 && ny2 < columns)
+        // Move forward in the direction
+        int nx = x + dx, ny = y + dy;
+        while (nx >= 0 && nx < rows && ny >= 0 && ny < columns && board[nx][ny] == symbol)
         {
-            if (board[nx1][ny1] == symbol && board[nx2][ny2] == symbol)
-            {
-                count++;
-            }
+            forward_count++;
+            nx += dx;
+            ny += dy;
         }
-        return count;
+
+        // Move backward in the opposite direction
+        nx = x - dx, ny = y - dy;
+        while (nx >= 0 && nx < rows && ny >= 0 && ny < columns && board[nx][ny] == symbol)
+        {
+            backward_count++;
+            nx -= dx;
+            ny -= dy;
+        }
+
+        // Total count includes the current cell
+        int total_count = forward_count + backward_count + 1;
+
+        // Adjust score based on sequence length
+        if (total_count == 3)
+        {
+            return 1; // Score 3 for sequence of exactly 3
+        }
+        else if (total_count == 4)
+        {
+            return 1; // Add 2 to align with scoring logic
+        }
+        else if (total_count == 5)
+        {
+            return 1; // Subtract 2 to ensure the total is reduced to match the requirement
+        }
+
+        return 0; // No points for sequences shorter than 3 or longer than 5
     }
 };
 
-class FiveByFivePlayer : public Player<char>
+// FiveByFiveRandomPlayer Implementation
+class FiveByFiveRandomPlayer : public RandomPlayer<char>
 {
 public:
-    FiveByFivePlayer(string n, char s) : Player<char>(n, s) {}
+    FiveByFiveRandomPlayer(char symbol) : RandomPlayer<char>(symbol)
+    {
+        srand(static_cast<unsigned int>(time(0))); // Seed for random number generation
+    }
 
     void getmove(int &x, int &y) override
     {
-        cout << name << " (" << symbol << "), enter your move (row and column): ";
-        cin >> x >> y;
+        x = rand() % 5;
+        y = rand() % 5;
     }
 };
 
+// FiveByFivePlayer Implementation
+class FiveByFivePlayer : public Player<char>
+{
+public:
+    FiveByFivePlayer(string name, char symbol) : Player<char>(name, symbol) {}
+
+    void getmove(int &x, int &y) override
+    {
+        cout << this->getname() << " (" << this->getsymbol() << "), enter your move (row and column): ";
+        cin >> x >> y;
+    }
+};
 #endif // FIVEBYFIVEBOARD_H
