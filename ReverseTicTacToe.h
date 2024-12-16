@@ -5,128 +5,187 @@
 #include <iostream>
 using namespace std;
 
-class ReverseTicTacToeBoard : public Board<char>
+class TicTacToeInverse : public Board<char>
 {
+private:
+    bool skipWin = true;
+    bool continue_game = true;
+
+    bool check_win()
+    {
+        for (int i = 0; i < this->rows; i++)
+        {
+            if ((this->board[i][0] == this->board[i][1] && this->board[i][1] == this->board[i][2] &&
+                 this->board[i][0] != '_') ||
+                (this->board[0][i] == this->board[1][i] && this->board[1][i] == this->board[2][i] &&
+                 this->board[0][i] != '_'))
+            {
+                return true;
+            }
+        }
+
+        if ((this->board[0][0] == this->board[1][1] && this->board[1][1] == this->board[2][2] &&
+             this->board[0][0] != '_') ||
+            (this->board[0][2] == this->board[1][1] && this->board[1][1] == this->board[2][0] &&
+             this->board[0][2] != '_'))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
 public:
-    ReverseTicTacToeBoard()
+    TicTacToeInverse()
     {
         rows = 3;
         columns = 3;
+        n_moves = 0;
         board = new char *[rows];
-        for (int i = 0; i < rows; i++)
+        for (int i = 0; i < rows; ++i)
         {
-            board[i] = new char[columns];
-            for (int j = 0; j < columns; j++)
+            board[i] = new char[columns]();
+            for (int j = 0; j < columns; ++j)
             {
-                board[i][j] = ' '; // Initialize all positions as empty
+                board[i][j] = '_';
             }
         }
     }
 
-    ~ReverseTicTacToeBoard()
+    bool game_is_over() override
     {
-        for (int i = 0; i < rows; i++)
+        if (this->is_win() || this->is_draw())
         {
-            delete[] board[i];
-        }
-        delete[] board;
-    }
-
-    bool update_board(int x, int y, char symbol) override
-    {
-        if (x >= 0 && x < rows && y >= 0 && y < columns && board[x][y] == ' ')
-        {
-            board[x][y] = symbol;
-            return true;
+            if (continue_game)
+            {
+                continue_game = false;
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
         return false;
     }
 
-    void display_board() override
-    {
-        cout << "  ";
-        for (int j = 0; j < columns; j++)
-            cout << j << " ";
-        cout << "\n";
-
-        for (int i = 0; i < rows; i++)
-        {
-            cout << i << " ";
-            for (int j = 0; j < columns; j++)
-            {
-                cout << board[i][j];
-                if (j < columns - 1)
-                    cout << "|";
-            }
-            cout << "\n";
-            if (i < rows - 1)
-            {
-                cout << "  ";
-                for (int k = 0; k < columns; k++)
-                {
-                    cout << "-";
-                    if (k < columns - 1)
-                        cout << "+";
-                }
-                cout << "\n";
-            }
-        }
-        cout << endl;
-    }
-
     bool is_win() override
     {
-        // Check rows
-        for (int i = 0; i < rows; i++)
+        if (check_win())
         {
-            if (board[i][0] != ' ' && board[i][0] == board[i][1] && board[i][1] == board[i][2])
+            if (skipWin)
             {
-                return true; // A player hits 3 in a row
+                skipWin = false;
+                return false;
+            }
+            else
+            {
+                return true;
             }
         }
-
-        // Check columns
-        for (int j = 0; j < columns; j++)
-        {
-            if (board[0][j] != ' ' && board[0][j] == board[1][j] && board[1][j] == board[2][j])
-            {
-                return true; // A player hits 3 in a column
-            }
-        }
-
-        // Check diagonals
-        if (board[0][0] != ' ' && board[0][0] == board[1][1] && board[1][1] == board[2][2])
-        {
-            return true; // A player hits 3 diagonally
-        }
-
-        if (board[0][2] != ' ' && board[0][2] == board[1][1] && board[1][1] == board[2][0])
-        {
-            return true; // A player hits 3 diagonally
-        }
-
         return false;
     }
 
     bool is_draw() override
     {
-        int filledCells = 0;
-        for (int i = 0; i < rows; i++)
+        if (this->n_moves == this->rows * this->columns + 1)
         {
-            for (int j = 0; j < columns; j++)
-            {
-                if (board[i][j] != ' ')
-                {
-                    filledCells++;
-                }
-            }
+            return true;
         }
-        return filledCells == rows * columns && !is_win();
+        else
+        {
+            return false;
+        }
     }
 
-    bool game_is_over() override
+    void display_board() override
     {
-        return is_win() || is_draw();
+
+        cout << "    ";
+        for (int col = 0; col < columns; ++col)
+        {
+            cout << "  " << col << "   ";
+        }
+        cout << "\n";
+
+        for (int row = 0; row < rows; ++row)
+        {
+            cout << "  ";
+            for (int col = 0; col < columns; ++col)
+            {
+                cout << "------";
+            }
+            cout << "-\n";
+
+            cout << row << " |";
+            for (int col = 0; col < columns; ++col)
+            {
+                cout << "  " << board[row][col] << "  |";
+            }
+            cout << "\n";
+        }
+
+        cout << "  ";
+        for (int col = 0; col < columns; ++col)
+        {
+            cout << "------";
+        }
+        cout << "-\n";
+    }
+
+    bool update_board(int x, int y, char symbol) override
+    {
+        if (!skipWin)
+        {
+            return true;
+        }
+        if (x < 0 || x >= rows || y < 0 || y >= columns)
+        {
+            return false;
+        }
+        if (board[x][y] == '_')
+        {
+            board[x][y] = symbol;
+            n_moves++;
+            return true;
+        }
+        return false;
+    }
+};
+
+class InversePlayer : public Player<char>
+{
+
+public:
+    InversePlayer(string n, char s) : Player<char>(n, s) {}
+
+    void getmove(int &x, int &y) override
+    {
+
+        cout << name << " (" << symbol << "), enter your move (row and column): ";
+        cin >> x >> y;
+    }
+};
+
+template <typename T>
+class InverseRandom : public RandomPlayer<T>
+{
+private:
+    int dimension;
+
+public:
+    InverseRandom(T symbol) : RandomPlayer<T>(symbol)
+    {
+        this->dimension = 3;
+        this->name = "Random Computer Player";
+        srand(static_cast<unsigned int>(time(0)));
+    }
+
+    void getmove(int &x, int &y) override
+    {
+        x = rand() % this->dimension;
+        y = rand() % this->dimension;
+        cout << this->name << " (" << this->symbol << ") chooses: " << x << ", " << y << std::endl;
     }
 };
 
