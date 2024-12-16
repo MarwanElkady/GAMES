@@ -1,26 +1,33 @@
 #include <iostream>
 #include "FiveByFive.h"
-#include "ReverseTicTacToe.h"
+#include "ReverseTicTacToe.h" 
+#include "PyramidTicTacToe.h" 
+#include "WordTicTacToe.h"
+
 
 using namespace std;
 
 int main()
 {
-
+    
     int choice;
     bool playAgain = true;
 
-    while (playAgain)
-    {
+    while (playAgain) {
         cout << "Welcome to the Ultimate Board Game Collection!" << endl;
         cout << "Choose a game to play:" << endl;
         cout << "1. Five-by-Five Tic Tac Toe" << endl;
         cout << "2. Reverse Tic Tac Toe" << endl;
+        cout << "3. Pyramid Tic Tac Toe" << endl;
+        cout << "4. Word Tic Tac Toe" << endl;
+        cout << "5. Numerical Tic Tac Toe" << endl;
+        cout << "6. Connect Four" << endl; 
+        cout << "7. Ultimate Tic Tac Toe" << endl;
+        cout << "8. SUS game" << endl;
         cout << "Enter your choice: ";
         cin >> choice;
 
-        if (cin.fail())
-        {
+        if (cin.fail()) {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << "Invalid input! Please enter a number between 1 and 8." << endl;
@@ -29,7 +36,7 @@ int main()
 
         if (choice == 1)
         {
-            FiveByFiveBoard board;
+            FiveByFiveBoard board; 
 
             cout << "Choose game mode:\n";
             cout << "1. Player vs Player\n";
@@ -37,6 +44,8 @@ int main()
             cout << "3. Computer vs Computer\n";
             int choice;
             cin >> choice;
+
+
 
             Player<char> *player2;
             Player<char> *player1;
@@ -60,10 +69,13 @@ int main()
 
             Player<char> *players[2] = {player1, player2};
 
+
             player1->setBoard(&board);
             player2->setBoard(&board);
 
+
             GameManager<char> gameManager(&board, players);
+
 
             gameManager.run();
 
@@ -73,6 +85,7 @@ int main()
             {
                 delete player2;
             }
+
         }
         else if (choice == 2)
         {
@@ -85,16 +98,20 @@ int main()
             int choice;
             cin >> choice;
 
+
             while (choice < 1 || choice > 3)
             {
                 cout << "Invalid choice. Please choose again (1, 2, or 3): ";
                 cin >> choice;
             }
 
+
             TicTacToeInverse board;
+
 
             Player<char> *player1 = nullptr;
             Player<char> *player2 = nullptr;
+
 
             if (choice == 1)
             {
@@ -114,46 +131,190 @@ int main()
 
             Player<char> *players[2] = {player1, player2};
 
+
             player1->setBoard(&board);
             player2->setBoard(&board);
 
+
             GameManager<char> gameManager(&board, players);
 
+
             gameManager.run();
+
 
             delete player1;
             delete player2;
 
             cout << "Thanks for playing Reverse Tic Tac Toe!" << endl;
         }
+
+                else if (choice == 3)
+        {
+            int choice;
+            Player<char>* players[2];
+            PyramidBoard<char>* B = new PyramidBoard<char>();
+            string player1Name, player2Name;
+
+            cout << "Welcome to Pyramid Tic Tac Toe !\n";
+
+            cout << "\nEnter Player 1 name: ";
+            cin >> player1Name;
+            cout << "\nChoose Player 1 type:\n";
+            cout << "1. Human\n";
+            cout << "2. Random Computer\n";
+            cin >> choice;
+
+            switch(choice) {
+                case 1:
+                    players[0] = new PyramidPlayer<char>(player1Name, 'X');
+                    break;
+                case 2:
+                    players[0] = new PyramidRandom_Player<char>('X');
+                    break;
+                default:
+                    cout << "Invalid choice for Player 1. Exiting the game.\n";
+                    return 1;
+            }
+
+            cout << "\nEnter Player 2 name: ";
+            cin >> player2Name;
+            cout << "\nChoose Player 2 type:\n";
+            cout << "1. Human\n";
+            cout << "2. Random Computer\n";
+            cin >> choice;
+
+            switch(choice) {
+                case 1:
+                    players[1] = new PyramidPlayer<char>(player2Name, 'O');
+                    break;
+                case 2:
+                    players[1] = new PyramidRandom_Player<char>('O');
+                    break;
+                default:
+                    cout << "Invalid choice for Player 2. Exiting the game.\n";
+                    return 1;
+            }
+
+            GameManager<char> Pyramidgame(B, players);
+            Pyramidgame.run();
+
+
+            delete B;
+            for (int i = 0; i < 2; ++i) {
+                delete players[i];
+            }
+
+        }
+        else if (choice == 4)
+        {
+
+            string dictionary_file = "dic.txt";
+            WordBoard<char> board(dictionary_file);
+
+            string player1_name, player2_name;
+            char player1_symbol = 'X'; 
+            char player2_symbol = 'O'; 
+            int player2_type, player1_type;
+
+            cout << "\nWelcome to Word Tic Tac Toe! \n";
+
+
+            while (true) {
+                cout << "\nChoose Player 1 type (1 for Human, 2 for Random): ";
+                cin >> player1_type;
+
+                if (cin.fail() || (player1_type != 1 && player1_type != 2)) {
+                    cin.clear(); 
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+                    cout << "Invalid input! Please enter 1 for Human or 2 for Random.\n";
+                } else {
+                    break; 
+                }
+            }
+
+            if (player1_type == 1) {
+                cout << "\nEnter Player 1's name: ";
+                cin >> player1_name;
+            }
+
+
+            while (true) {
+                cout << "\nChoose Player 2 type (1 for Human, 2 for Random): ";
+                cin >> player2_type;
+
+                if (cin.fail() || (player2_type != 1 && player2_type != 2)) {
+                    cin.clear(); 
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+                    cout << "Invalid input! Please enter 1 for Human or 2 for Random.\n";
+                } else {
+                    break; 
+                }
+            }
+
+            if (player2_type == 1) {
+                cout << "\nEnter Player 2's name: ";
+                cin >> player2_name;
+            }
+
+            Player<char>* player1;
+            Player<char>* player2;
+
+            if (player1_type == 1) {
+                player1 = new WordPlayer<char>(player1_name, player1_symbol);
+            } else {
+                player1 = new RandomWordPlayer<char>('A', 3); 
+            }
+
+            if (player2_type == 1) {
+                player2 = new WordPlayer<char>(player2_name, player2_symbol);
+            } else {
+                player2 = new RandomWordPlayer<char>('A', 3); 
+            }
+
+
+            player1->setBoard(&board);
+            player2->setBoard(&board);
+
+
+            Player<char>* players[2] = {player1, player2};
+
+            GameManager<char> Wordgame(&board, players);
+
+            cout << "\nStarting Word Tic-Tac-Toe! Players will enter coordinates (x, y) and letters.\n";
+            cout << "To win, form a valid word from the dictionary in a row, column, or diagonal.\n";
+
+            Wordgame.run();
+
+            cout << "\nGame Over! Thanks for playing!\n";
+
+            delete player1;
+            delete player2;
+
+
+        }
+
         else
         {
             cout << "Invalid choice. Exiting program." << endl;
             continue;
         }
 
-        char playAgainChoice;
-        while (true)
-        {
-            cout << "\nDo you want to play another game? (y/n): ";
-            cin >> playAgainChoice;
+    char playAgainChoice;
+            while (true) {
+                cout << "\nDo you want to play another game? (y/n): ";
+                cin >> playAgainChoice;
 
-            if (playAgainChoice == 'y' || playAgainChoice == 'Y')
-            {
-                playAgain = true;
-                break;
+                if (playAgainChoice == 'y' || playAgainChoice == 'Y') {
+                    playAgain = true;
+                    break;
+                } else if (playAgainChoice == 'n' || playAgainChoice == 'N') {
+                    playAgain = false;
+                    cout << "\nThank you for playing! Goodbye!" << endl;
+                    break;
+                } else {
+                    cout << "Invalid input! Please enter 'y' or 'n'." << endl;
+                }
             }
-            else if (playAgainChoice == 'n' || playAgainChoice == 'N')
-            {
-                playAgain = false;
-                cout << "\nThank you for playing! Goodbye!" << endl;
-                break;
-            }
-            else
-            {
-                cout << "Invalid input! Please enter 'y' or 'n'." << endl;
-            }
-        }
     }
 
     return 0;
