@@ -2,9 +2,11 @@
 #include "FiveByFive.h"
 #include "ReverseTicTacToe.h"
 #include "PyramidTicTacToe.h" 
-#include "wordtictactoe.h"
-#include "ConnectFour.h"  
+#include "WordTicTacToe.h"
 #include "NumericalGame.h" 
+#include "ConnectFour.h"  
+#include "Susgame.h"
+#include "Ultimate.h"
 
 
 using namespace std;
@@ -389,6 +391,118 @@ int main()
             delete players[0];
             delete players[1];
             delete board;
+        }
+
+        else if (choice == 7)
+        {
+            srand(time(0));
+
+            UltimateTicTacToeBoard board;
+            Player<char>* players[2];
+
+            cout << "\nWelcome To Ultimate Tic Tac Toe!\n";
+            
+            string player1Name, player2Name;
+            cout << "\nEnter name for Player 1: ";
+            cin >> player1Name;
+
+            char choice;
+            cout << "\nChoose Player 1 (1 for human, 2 for random): ";
+            cin >> choice;
+            if (choice == '1') {
+                players[0] = new UltHumanPlayer<char>(player1Name, 'X');
+            } else {
+                players[0] = new UltimateTicTacToeRandomPlayer<char>('X');
+            }
+
+            cout << "\nEnter name for Player 2: ";
+            cin >> player2Name;
+
+            cout << "\nChoose Player 2 (1 for human, 2 for random): ";
+            cin >> choice;
+            if (choice == '1') {
+                players[1] = new UltHumanPlayer<char>(player2Name, 'O');
+            } else {
+                players[1] = new UltimateTicTacToeRandomPlayer<char>('O');
+            }
+
+
+            GameManager<char> Ultimate(&board, players);
+            Ultimate.run();
+
+            delete players[0];
+            delete players[1];
+
+
+        }
+
+        else if (choice == 8)
+        {
+            srand(static_cast<unsigned>(time(0)));
+
+            cout << "\nWelcome To SUS Game!\n";
+            int player1_type;
+            while (true) {
+                cout << "\nChoose Player 1 type (1 for Human, 2 for Random): ";
+                cin >> player1_type;
+
+                if (cin.fail() || (player1_type != 1 && player1_type != 2)) {
+                    cin.clear(); 
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+                    cout << "Invalid input! Please enter 1 for Human or 2 for Random.\n";
+                } else {
+                    break; 
+                }
+            }
+
+            int player2_type;
+            while (true) {
+                cout << "\nChoose Player 2 type (1 for Human, 2 for Random): ";
+                cin >> player2_type;
+
+                if (cin.fail() || (player2_type != 1 && player2_type != 2)) {
+                    cin.clear(); 
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+                    cout << "Invalid input! Please enter 1 for Human or 2 for Random.\n";
+                } else {
+                    break; 
+                }
+            }
+
+            
+            SUSBoard<char> board(3,3);
+
+            
+            Player<char>* player1;
+            Player<char>* player2;
+
+            if (player1_type == 1) {
+                player1 = new SUSHumanPlayer<char>("Player 1", 'S');
+            } else {
+                player1 = new RandomSUSPlayer<char>('S', 3);
+            }
+
+            if (player2_type == 1) {
+                player2 = new SUSHumanPlayer<char>("Player 2", 'U');
+            } else {
+                player2 = new RandomSUSPlayer<char>('U', 3);
+            }
+
+            
+            player1->setBoard(&board);
+            player2->setBoard(&board);
+
+        
+            Player<char>* players[2] = {player1, player2};
+
+            
+            GameManager<char> Susgame(&board, players);
+            Susgame.run();
+
+        
+            delete player1;
+            delete player2;
+
         }
         else
         {
